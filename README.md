@@ -1,8 +1,8 @@
 - 👋 Hi, I’m @ericx00
 - 👀 I’m interested in chess and coding 
 - 🌱 I’m currently learning mathematics and computer science at maseno University 
-- 💞️ I’m looking to collaborate on full stack software development 
-- 📫 How to reach me 0769682650 
+- 💞️ I’m looking to collaborate on full stack software development projects
+- 📫 How to reach me vladimireric54@gmail.com
 
 <!---
 ericx00/ericx00 is a ✨ special ✨ repository because its `README.md` (this file) appears on your GitHub profile.
