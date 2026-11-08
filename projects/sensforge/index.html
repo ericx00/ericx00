@@ -1,0 +1,69 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>SensForge — sensitivity converter & aim trainer</title>
+<meta name="description" content="Convert sensitivity between CS2, Valorant, Apex, Overwatch 2 and more by cm/360, find your ideal sens with PSA, and train aim with your real in-game sensitivity.">
+<link rel="stylesheet" href="src/styles.css">
+</head>
+<body>
+<header>
+  <h1>Sens<span>Forge</span></h1>
+  <nav role="tablist">
+    <button role="tab" data-tab="convert" aria-selected="true">Converter</button>
+    <button role="tab" data-tab="train" aria-selected="false">Aim trainer</button>
+    <button role="tab" data-tab="psa" aria-selected="false">Sens finder</button>
+  </nav>
+</header>
+<main>
+  <section id="tab-convert" class="tab">
+    <div class="grid">
+      <label>Game <select id="game"></select></label>
+      <label>Sensitivity <input id="sens" type="number" step="any" min="0" value="0.4"></label>
+      <label>Mouse DPI <input id="dpi" type="number" step="50" min="50" value="800"></label>
+      <label>Target DPI <input id="dpi2" type="number" step="50" min="50" value="800"></label>
+    </div>
+    <div class="stats">
+      <div><b id="cm360">—</b><span>cm / 360°</span></div>
+      <div><b id="in360">—</b><span>inches / 360°</span></div>
+      <div><b id="edpi">—</b><span>eDPI (this game)</span></div>
+      <div><b id="feel">—</b><span>feel</span></div>
+    </div>
+    <table id="table"><thead><tr><th>Game</th><th>Sensitivity</th><th></th></tr></thead><tbody></tbody></table>
+    <p class="muted small">Matched by cm/360 (yaw × sens × DPI), the standard way to keep muscle memory between games. Scoped/ADS multipliers and FOV differences are not included. Items marked ≈ are approximate.</p>
+  </section>
+
+  <section id="tab-train" class="tab" hidden>
+    <div class="grid">
+      <label>Mode <select id="mode"></select></label>
+      <label>Horizontal FOV <input id="fov" type="number" min="60" max="130" step="0.01"></label>
+      <div class="using">Using <b id="using"></b></div>
+      <button id="start" class="primary">Start (click the arena to lock the mouse)</button>
+    </div>
+    <p class="muted small" id="mode-desc"></p>
+    <div class="arena-wrap"><canvas id="arena" width="1280" height="720"></canvas><div id="overlay" class="overlay"></div></div>
+    <h3>Best scores</h3>
+    <table id="history"><thead><tr><th>Mode</th><th>Sens</th><th>Score</th><th>Accuracy</th><th>Avg time/kill</th></tr></thead><tbody></tbody></table>
+  </section>
+
+  <section id="tab-psa" class="tab" hidden>
+    <p>Perfect Sensitivity Approximation: you compare a lower (A) and a higher (B) sensitivity in 15-second wide-flick rounds,
+       then pick the one that felt better. Each pick halves the range. Seven rounds land within a few percent.</p>
+    <div class="psa">
+      <div class="psa-round" id="psa-round"></div>
+      <div class="psa-buttons">
+        <button id="try-a">Try A</button><button id="try-b">Try B</button>
+      </div>
+      <div class="psa-buttons">
+        <button id="pick-a" class="primary">A felt better</button><button id="pick-b" class="primary">B felt better</button>
+      </div>
+      <button id="psa-reset">Restart from the converter sens</button>
+      <div id="psa-result"></div>
+    </div>
+  </section>
+</main>
+<footer class="muted small">Your settings and scores stay in this browser.</footer>
+<script type="module" src="src/app.js"></script>
+</body>
+</html>

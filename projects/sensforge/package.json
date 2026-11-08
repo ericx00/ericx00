@@ -1,0 +1,12 @@
+{
+  "name": "sensforge",
+  "version": "0.1.0",
+  "description": "Sensitivity converter, cm/360 calculator, PSA sensitivity finder and a 3D aim trainer that uses your real in-game sensitivity.",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "serve": "node scripts/serve.js",
+    "test": "node --test"
+  },
+  "license": "UNLICENSED"
+}
