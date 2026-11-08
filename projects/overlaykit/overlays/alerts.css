@@ -1,0 +1,13 @@
+.alert { position: absolute; left: 50%; top: 120px; display: flex; gap: 26px; align-items: center; min-width: 760px; max-width: 1100px;
+  padding: 26px 40px 26px 26px; border-radius: 22px; background: color-mix(in srgb, var(--panel) 94%, transparent);
+  border: 3px solid var(--accent); box-shadow: 0 0 60px color-mix(in srgb, var(--accent) 45%, transparent);
+  opacity: 0; transform: translate(-50%, -40px) scale(.92); transition: opacity .5s, transform .6s cubic-bezier(.2,1.4,.3,1); }
+.alert.show { opacity: 1; transform: translate(-50%, 0) scale(1); }
+.alert-icon { flex: none; width: 110px; height: 110px; border-radius: 18px; display: grid; place-items: center; font-size: 60px;
+  background: linear-gradient(135deg, var(--accent), var(--accent2)); color: var(--bg); }
+.alert.show .alert-icon { animation: pop 1s ease-out; }
+.alert-title { font-family: var(--font); text-transform: uppercase; letter-spacing: .08em; color: var(--accent2); font-size: 28px; }
+.alert-msg { font-size: 46px; font-weight: 700; line-height: 1.15; }
+.alert-user { font-size: 28px; color: var(--muted); margin-top: 6px; }
+.alert-user:empty { display: none; }
+@keyframes pop { 0% { transform: scale(.4) rotate(-12deg); } 60% { transform: scale(1.15) rotate(4deg); } 100% { transform: none; } }

@@ -1,0 +1,47 @@
+/* Generated from themes.json by scripts/build.js. */
+window.OVERLAY_THEMES = {
+  "neon": {
+    "label": "Neon Pulse",
+    "bg": "#0b0618",
+    "panel": "#160d2e",
+    "text": "#f4f0ff",
+    "muted": "#a99bd6",
+    "accent": "#b14cff",
+    "accent2": "#00e5ff",
+    "font": "Orbitron",
+    "body": "Rajdhani"
+  },
+  "sunset": {
+    "label": "Sunset Drive",
+    "bg": "#1a0b14",
+    "panel": "#2a1220",
+    "text": "#fff4ec",
+    "muted": "#e0a99a",
+    "accent": "#ff6a3d",
+    "accent2": "#ffc93c",
+    "font": "Bungee",
+    "body": "Outfit"
+  },
+  "mono": {
+    "label": "Clean Mono",
+    "bg": "#0e0e10",
+    "panel": "#1a1a1d",
+    "text": "#f5f5f5",
+    "muted": "#9a9aa2",
+    "accent": "#ffffff",
+    "accent2": "#7a7a85",
+    "font": "Space Grotesk",
+    "body": "Inter"
+  },
+  "forest": {
+    "label": "Moss & Ember",
+    "bg": "#0c1410",
+    "panel": "#14211a",
+    "text": "#eef6ee",
+    "muted": "#9fbfa8",
+    "accent": "#5bd68a",
+    "accent2": "#f2b84b",
+    "font": "Righteous",
+    "body": "Nunito"
+  }
+};

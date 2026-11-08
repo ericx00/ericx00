@@ -1,0 +1,7 @@
+/* StreamElements substitutes double-brace field names with the values from the widget's Fields panel. */
+@import url('https://fonts.googleapis.com/css2?family={{displayFont}}:wght@400;700&family={{bodyFont}}:wght@400;700&display=swap');
+:root { --bg: {{bgColor}}; --panel: {{panelColor}}; --text: {{textColor}}; --muted: {{mutedColor}}; --accent: {{accentColor}}; --accent2: {{accent2Color}};
+  --font: '{{displayFont}}', system-ui, sans-serif; --body: '{{bodyFont}}', system-ui, sans-serif; }
+* { box-sizing: border-box; margin: 0; padding: 0; }
+body { background: transparent; color: var(--text); font-family: var(--body); overflow: hidden; }
+/*@@ALERTS_CSS@@*/

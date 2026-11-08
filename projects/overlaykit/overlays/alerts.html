@@ -1,0 +1,31 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Alerts (preview)</title>
+<link rel="stylesheet" href="base.css">
+<link rel="stylesheet" href="alerts.css">
+<script src="themes.js"></script><script src="lib.js"></script>
+</head>
+<body class="transparent">
+<div class="alert" id="alert"><div class="alert-icon" id="icon"></div><div><div class="alert-title" id="atitle"></div><div class="alert-msg" id="amsg"></div><div class="alert-user" id="auser"></div></div></div>
+<script>
+  // Standalone preview of the alert style. Use ?demo=1 to cycle sample alerts (great for promo clips).
+  // For live alerts, use the StreamElements widget in dist/<theme>/streamelements-alerts/.
+  var P = Overlay.parseParams(location.search);
+  Overlay.applyTheme(document, Overlay.resolveTheme(window.OVERLAY_THEMES, P));
+  var ICONS = { follower: '♥', subscriber: '★', gift: '🎁', tip: '$', cheer: '◆', raid: '⚑' };
+  var box = document.getElementById('alert');
+  var q = new Overlay.AlertQueue(function (a, done) {
+    document.getElementById('icon').textContent = ICONS[a.kind] || '!';
+    document.getElementById('atitle').innerHTML = a.title;
+    document.getElementById('amsg').innerHTML = a.message;
+    document.getElementById('auser').innerHTML = a.userMessage;
+    box.classList.add('show');
+    setTimeout(function () { box.classList.remove('show'); setTimeout(done, 700); }, (Number(P.duration) || 6) * 1000);
+  });
+  window.overlayAlert = function (type, event) { var a = Overlay.formatAlert(type, event); if (a) q.push(a); };
+  if (P.demo) {
+    var samples = [['follower', { name: 'PixelPilot' }], ['subscriber', { name: 'NovaKai', amount: 6 }], ['tip', { name: 'Ruth', amount: 5, message: 'Clutch play!' }],
+      ['cheer', { name: 'b1tlord', amount: 500 }], ['raid', { name: 'CozyCastsTV', amount: 42 }], ['subscriber', { name: 'Lee', gifted: true, sender: 'Marla' }]];
+    var k = 0; setInterval(function () { overlayAlert.apply(null, samples[k++ % samples.length]); }, 8000); overlayAlert.apply(null, samples[k++]);
+  }
+</script>
+</body></html>

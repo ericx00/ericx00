@@ -1,0 +1,32 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>Thanks for watching</title>
+<link rel="stylesheet" href="base.css">
+<script src="themes.js"></script><script src="lib.js"></script>
+</head>
+<body class="scene">
+<div class="backdrop"><div class="orb a"></div><div class="orb b"></div></div>
+<div class="center">
+  <div class="title display glow" id="title">Thanks for watching</div>
+  <div class="subtitle" id="subtitle">See you next stream</div>
+  
+  <div class="socials" id="socials"></div>
+</div>
+<div class="ticker" id="ticker"></div>
+<script>
+  var P = Overlay.parseParams(location.search);
+  Overlay.applyTheme(document, Overlay.resolveTheme(window.OVERLAY_THEMES, P));
+  if (P.title) document.getElementById('title').textContent = P.title;
+  if (P.subtitle) document.getElementById('subtitle').textContent = P.subtitle;
+  var socials = document.getElementById('socials');
+  Overlay.parseSocials(P.socials).forEach(function (s) {
+    var el = document.createElement('div'); el.className = 'social';
+    var b = document.createElement('b'); b.textContent = s.platform;
+    el.appendChild(b); el.appendChild(document.createTextNode(s.handle)); socials.appendChild(el);
+  });
+  // Rotating messages: ?messages=Grab a drink|Follow for notifications
+  var msgs = (P.messages || '').split('|').filter(Boolean), ticker = document.getElementById('ticker'), mi = 0;
+  function rotate() { if (!msgs.length) return; ticker.style.opacity = 0; setTimeout(function () { ticker.textContent = msgs[mi++ % msgs.length]; ticker.style.opacity = 1; }, 600); }
+  rotate(); setInterval(rotate, 8000);
+</script>
+
+</body></html>

@@ -1,0 +1,11 @@
+{
+  "name": "overlaykit",
+  "version": "0.1.0",
+  "description": "Themeable stream overlay pack: OBS browser-source scenes, StreamElements alert widget, Twitch panels.",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "build": "node scripts/build.js",
+    "test": "node --test"
+  },
+  "license": "UNLICENSED"
+}
