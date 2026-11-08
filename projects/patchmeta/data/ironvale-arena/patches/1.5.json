@@ -1,0 +1,312 @@
+{
+  "version": "1.5",
+  "date": "2026-11-04",
+  "heroes": [
+    {
+      "id": "kestrel",
+      "name": "Kestrel",
+      "role": "marksman",
+      "stats": {
+        "attack": 58,
+        "health": 560
+      },
+      "wins": 2380,
+      "games": 4900
+    },
+    {
+      "id": "vey",
+      "name": "Vey",
+      "role": "marksman",
+      "stats": {
+        "attack": 58,
+        "health": 590
+      },
+      "wins": 3200,
+      "games": 6100
+    },
+    {
+      "id": "oro",
+      "name": "Oro",
+      "role": "marksman",
+      "stats": {
+        "attack": 68,
+        "health": 530
+      },
+      "wins": 700,
+      "games": 1300
+    },
+    {
+      "id": "lumen",
+      "name": "Lumen",
+      "role": "mage",
+      "stats": {
+        "power": 30,
+        "health": 520
+      },
+      "wins": 2500,
+      "games": 4800
+    },
+    {
+      "id": "sable",
+      "name": "Sable",
+      "role": "mage",
+      "stats": {
+        "power": 32,
+        "health": 500
+      },
+      "wins": 5000,
+      "games": 10200
+    },
+    {
+      "id": "thistle",
+      "name": "Thistle",
+      "role": "mage",
+      "stats": {
+        "power": 28,
+        "health": 560
+      },
+      "wins": 60,
+      "games": 110
+    },
+    {
+      "id": "brann",
+      "name": "Brann",
+      "role": "vanguard",
+      "stats": {
+        "armor": 40,
+        "health": 700
+      },
+      "wins": 2900,
+      "games": 5500
+    },
+    {
+      "id": "moss",
+      "name": "Moss",
+      "role": "vanguard",
+      "stats": {
+        "armor": 36,
+        "health": 780
+      },
+      "wins": 2050,
+      "games": 3800
+    },
+    {
+      "id": "ingot",
+      "name": "Ingot",
+      "role": "vanguard",
+      "stats": {
+        "armor": 44,
+        "health": 680
+      },
+      "wins": 2150,
+      "games": 4300
+    },
+    {
+      "id": "pyre",
+      "name": "Pyre",
+      "role": "mage",
+      "stats": {
+        "power": 32,
+        "health": 510
+      },
+      "wins": 2600,
+      "games": 5000
+    },
+    {
+      "id": "quill",
+      "name": "Quill",
+      "role": "marksman",
+      "stats": {
+        "attack": 60,
+        "health": 550
+      },
+      "wins": 1010,
+      "games": 1950
+    },
+    {
+      "id": "tor",
+      "name": "Tor",
+      "role": "vanguard",
+      "stats": {
+        "armor": 38,
+        "health": 720
+      },
+      "wins": 1500,
+      "games": 2900
+    }
+  ],
+  "items": [
+    {
+      "id": "stormbow",
+      "name": "Stormbow",
+      "cost": 3100,
+      "category": "weapon",
+      "stats": {
+        "attack": 45,
+        "attack_speed": 25
+      }
+    },
+    {
+      "id": "razor-edge",
+      "name": "Razor Edge",
+      "cost": 3400,
+      "category": "weapon",
+      "stats": {
+        "attack": 60,
+        "crit": 15
+      }
+    },
+    {
+      "id": "bloodfang",
+      "name": "Bloodfang",
+      "cost": 3000,
+      "category": "weapon",
+      "stats": {
+        "attack": 40,
+        "lifesteal": 15
+      }
+    },
+    {
+      "id": "quickstring",
+      "name": "Quickstring",
+      "cost": 2600,
+      "category": "weapon",
+      "stats": {
+        "attack_speed": 45,
+        "crit": 15
+      }
+    },
+    {
+      "id": "sunglass-orb",
+      "name": "Sunglass Orb",
+      "cost": 3000,
+      "category": "focus",
+      "stats": {
+        "power": 80,
+        "mana": 300
+      }
+    },
+    {
+      "id": "hourwand",
+      "name": "Hourwand",
+      "cost": 2800,
+      "category": "focus",
+      "stats": {
+        "power": 55,
+        "haste": 20
+      }
+    },
+    {
+      "id": "void-lens",
+      "name": "Void Lens",
+      "cost": 3500,
+      "category": "focus",
+      "stats": {
+        "power": 100
+      }
+    },
+    {
+      "id": "sage-tome",
+      "name": "Sage Tome",
+      "cost": 2400,
+      "category": "focus",
+      "stats": {
+        "power": 40,
+        "haste": 15,
+        "mana": 250
+      }
+    },
+    {
+      "id": "bulwark",
+      "name": "Bulwark",
+      "cost": 2600,
+      "category": "armor",
+      "stats": {
+        "health": 400,
+        "armor": 45
+      }
+    },
+    {
+      "id": "wardcloak",
+      "name": "Wardcloak",
+      "cost": 2700,
+      "category": "armor",
+      "stats": {
+        "health": 350,
+        "resist": 50
+      }
+    },
+    {
+      "id": "ironheart",
+      "name": "Ironheart",
+      "cost": 3000,
+      "category": "armor",
+      "stats": {
+        "health": 600,
+        "armor": 20,
+        "resist": 20
+      }
+    },
+    {
+      "id": "vigil-plate",
+      "name": "Vigil Plate",
+      "cost": 2900,
+      "category": "armor",
+      "stats": {
+        "armor": 40,
+        "resist": 30,
+        "haste": 10
+      }
+    },
+    {
+      "id": "swift-greaves",
+      "name": "Swift Greaves",
+      "cost": 1100,
+      "category": "boots",
+      "stats": {
+        "move_speed": 45
+      }
+    },
+    {
+      "id": "sage-boots",
+      "name": "Sage Boots",
+      "cost": 1000,
+      "category": "boots",
+      "stats": {
+        "move_speed": 40,
+        "haste": 10
+      }
+    },
+    {
+      "id": "iron-boots",
+      "name": "Iron Boots",
+      "cost": 1100,
+      "category": "boots",
+      "stats": {
+        "move_speed": 40,
+        "armor": 20
+      }
+    },
+    {
+      "id": "ancient-relic",
+      "name": "Ancient Relic",
+      "cost": 2200,
+      "category": "relic",
+      "stats": {
+        "health": 300,
+        "haste": 15
+      }
+    },
+    {
+      "id": "tide-relic",
+      "name": "Tide Relic",
+      "cost": 2100,
+      "category": "relic",
+      "stats": {
+        "power": 35,
+        "mana": 200,
+        "haste": 5
+      }
+    }
+  ]
+}

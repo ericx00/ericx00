@@ -1,0 +1,12 @@
+{
+  "slug": "ironvale-arena",
+  "name": "Ironvale Arena",
+  "note": "Sample data for a fictional game. Replace with your own game's patch data and match stats.",
+  "siteUrl": "https://example.com",
+  "build": { "budget": 16500, "slots": 6, "caps": { "boots": 1, "relic": 1 } },
+  "roles": {
+    "marksman": { "label": "Marksman", "weights": { "attack": 1.0, "attack_speed": 0.8, "crit": 1.4, "lifesteal": 0.6, "health": 0.05, "move_speed": 0.3 } },
+    "mage":     { "label": "Mage",     "weights": { "power": 1.0, "haste": 1.2, "mana": 0.15, "health": 0.06, "move_speed": 0.3 } },
+    "vanguard": { "label": "Vanguard", "weights": { "health": 0.12, "armor": 1.0, "resist": 1.0, "haste": 0.6, "move_speed": 0.4 } }
+  }
+}

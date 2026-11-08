@@ -1,0 +1,15 @@
+{
+  "name": "patchmeta",
+  "version": "0.1.0",
+  "description": "Patch-day meta guide engine: tier lists from match stats, build optimizer, patch diff articles, static SEO site.",
+  "type": "module",
+  "engines": { "node": ">=20" },
+  "bin": { "patchmeta": "src/cli.js" },
+  "scripts": {
+    "build": "node src/cli.js build",
+    "diff": "node src/cli.js diff",
+    "serve": "node src/cli.js serve",
+    "test": "node --test"
+  },
+  "license": "UNLICENSED"
+}
