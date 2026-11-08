@@ -1,0 +1,17 @@
+{
+  "name": "guildforge-bot",
+  "version": "0.1.0",
+  "description": "Discord bot for gaming communities: tournaments, Elo leaderboards and giveaways, with a free tier and per-server premium.",
+  "type": "module",
+  "main": "src/index.js",
+  "engines": { "node": ">=22.13" },
+  "scripts": {
+    "start": "node --env-file=.env src/index.js",
+    "deploy-commands": "node --env-file=.env src/deploy-commands.js",
+    "test": "node --test"
+  },
+  "license": "UNLICENSED",
+  "dependencies": {
+    "discord.js": "^14.28.1"
+  }
+}
