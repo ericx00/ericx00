@@ -1,0 +1,8 @@
+[project]
+name = "assetforge"
+version = "0.1.0"
+description = "Procedural, original game assets (retro SFX, pixel sprites, pixel UI kit) with zero dependencies."
+requires-python = ">=3.10"
+
+[project.scripts]
+assetforge = "assetforge.__main__:main"
