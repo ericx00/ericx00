@@ -22,18 +22,31 @@ def sweep(f0: float, f1: float, seconds: float, curve: float = 1.0) -> list[floa
     return [f0 + (f1 - f0) * ((i / max(1, n - 1)) ** curve) for i in range(n)]
 
 
+def _blep(t: float, dt: float) -> float:
+    """PolyBLEP correction: removes the aliasing a naive square/saw makes at each jump."""
+    if t < dt:
+        t /= dt
+        return t + t - t * t - 1.0
+    if t > 1.0 - dt:
+        t = (t - 1.0) / dt
+        return t * t + t + t + 1.0
+    return 0.0
+
+
 def osc(freqs: list[float], shape: str = "sine", duty: float = 0.5, rng: random.Random | None = None) -> Signal:
+    """Band-limited oscillators (square and saw use PolyBLEP, so high sweeps don't alias)."""
     rng = rng or random.Random(0)
     out, phase = [], 0.0
     held, hold_left = 0.0, 0
     for f in freqs:
+        dt = min(0.49, max(f, 1e-6) / SR)
         phase = (phase + f / SR) % 1.0
         if shape == "sine":
             v = math.sin(2 * math.pi * phase)
         elif shape == "square":
-            v = 1.0 if phase < duty else -1.0
+            v = (1.0 if phase < duty else -1.0) + _blep(phase, dt) - _blep((phase - duty) % 1.0, dt)
         elif shape == "saw":
-            v = 2 * phase - 1
+            v = 2 * phase - 1 - _blep(phase, dt)
         elif shape == "triangle":
             v = 4 * abs(phase - 0.5) - 1
         elif shape == "noise":
@@ -74,6 +87,36 @@ def lowpass(sig: Signal, cutoff: float) -> Signal:
         y += alpha * (v - y)
         out.append(y)
     return out
+
+
+def svf(sig: Signal, cutoffs: list[float] | float, q: float = 0.7, mode: str = "band") -> Signal:
+    """State-variable filter with a per-sample cutoff (sweeps for whooshes, wah, resonance)."""
+    n = len(sig)
+    cs = cutoffs if isinstance(cutoffs, list) else [cutoffs] * n
+    low = band = 0.0
+    damp = 1.0 / max(q, 0.05)
+    out = []
+    for i, v in enumerate(sig):
+        fc = min(cs[min(i, len(cs) - 1)], SR / 6)
+        f = 2 * math.sin(math.pi * fc / SR)
+        low += f * band
+        high = v - low - damp * band
+        band += f * high
+        out.append(band if mode == "band" else low if mode == "low" else high)
+    return out
+
+
+def vibrato(freqs: list[float], rate: float, depth: float) -> list[float]:
+    return [f * (1 + depth * math.sin(2 * math.pi * rate * i / SR)) for i, f in enumerate(freqs)]
+
+
+def tremolo(sig: Signal, rate: float, depth: float) -> Signal:
+    return [v * (1 - depth * (0.5 + 0.5 * math.sin(2 * math.pi * rate * i / SR))) for i, v in enumerate(sig)]
+
+
+def note(freq: float, seconds: float, shape: str = "square", duty: float = 0.5, attack: float = 0.003, release: float | None = None) -> Signal:
+    rel = seconds * 0.4 if release is None else release
+    return envelope(osc(sweep(freq, freq, seconds), shape, duty=duty), attack, 0.03, 0.75, rel)
 
 
 def mix(*sigs: Signal, gains: list[float] | None = None) -> Signal:
@@ -128,15 +171,33 @@ def write_wav(path: str | Path, sig: Signal) -> Path:
     return p
 
 
-def finalize(sig: Signal, peak: float = 0.89) -> Signal:
-    """DC removal -> click-free edge fades -> peak scaling (in that order so very short
-    sounds still reach full level and the first/last samples stay at exactly zero)."""
+def short_term_db(sig: Signal, window: float = 0.05) -> float:
+    """Loudest 50 ms RMS window in dBFS: a simple proxy for how loud a short SFX sounds."""
+    n = max(1, int(window * SR))
+    if len(sig) <= n:
+        rms = math.sqrt(sum(v * v for v in sig) / max(1, len(sig)))
+    else:
+        sq = [v * v for v in sig]
+        acc = sum(sq[:n]); best = acc
+        for i in range(n, len(sq)):
+            acc += sq[i] - sq[i - n]
+            best = max(best, acc)
+        rms = math.sqrt(best / n)
+    return 20 * math.log10(rms + 1e-12)
+
+
+def finalize(sig: Signal, peak: float = 0.89, target_db: float | None = None) -> Signal:
+    """DC removal -> click-free edge fades -> level. With target_db, sounds are matched by
+    loudness (short-term RMS), never exceeding the peak ceiling (about -1 dBFS)."""
     if not sig:
         return sig
     mean = sum(sig) / len(sig)
     faded = fade_edges([v - mean for v in sig])
     m = max(abs(v) for v in faded) or 1.0
-    return [v * peak / m for v in faded]
+    gain = peak / m
+    if target_db is not None:
+        gain = min(gain, 10 ** ((target_db - short_term_db(faded)) / 20))
+    return [v * gain for v in faded]
 
 
 Recipe = Callable[[random.Random], Signal]

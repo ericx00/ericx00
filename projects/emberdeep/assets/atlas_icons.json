@@ -1,0 +1,420 @@
+{
+ "image": "atlas_icons.png",
+ "scale": 1,
+ "frames": {
+  "action_dice": {
+   "x": 2,
+   "y": 2,
+   "w": 16,
+   "h": 16
+  },
+  "action_duplicate": {
+   "x": 20,
+   "y": 2,
+   "w": 16,
+   "h": 16
+  },
+  "action_end_turn": {
+   "x": 38,
+   "y": 2,
+   "w": 16,
+   "h": 16
+  },
+  "action_heal": {
+   "x": 56,
+   "y": 2,
+   "w": 16,
+   "h": 16
+  },
+  "action_max_hp": {
+   "x": 74,
+   "y": 2,
+   "w": 16,
+   "h": 16
+  },
+  "action_remove": {
+   "x": 92,
+   "y": 2,
+   "w": 16,
+   "h": 16
+  },
+  "action_swap": {
+   "x": 110,
+   "y": 2,
+   "w": 16,
+   "h": 16
+  },
+  "action_target": {
+   "x": 128,
+   "y": 2,
+   "w": 16,
+   "h": 16
+  },
+  "action_transform": {
+   "x": 146,
+   "y": 2,
+   "w": 16,
+   "h": 16
+  },
+  "action_turn": {
+   "x": 2,
+   "y": 20,
+   "w": 16,
+   "h": 16
+  },
+  "action_upgrade": {
+   "x": 20,
+   "y": 20,
+   "w": 16,
+   "h": 16
+  },
+  "intent_attack": {
+   "x": 38,
+   "y": 20,
+   "w": 16,
+   "h": 16
+  },
+  "intent_buff": {
+   "x": 56,
+   "y": 20,
+   "w": 16,
+   "h": 16
+  },
+  "intent_debuff": {
+   "x": 74,
+   "y": 20,
+   "w": 16,
+   "h": 16
+  },
+  "intent_defend": {
+   "x": 92,
+   "y": 20,
+   "w": 16,
+   "h": 16
+  },
+  "intent_flee": {
+   "x": 110,
+   "y": 20,
+   "w": 16,
+   "h": 16
+  },
+  "intent_heavy_attack": {
+   "x": 128,
+   "y": 20,
+   "w": 16,
+   "h": 16
+  },
+  "intent_multi_attack": {
+   "x": 146,
+   "y": 20,
+   "w": 16,
+   "h": 16
+  },
+  "intent_sleep": {
+   "x": 2,
+   "y": 38,
+   "w": 16,
+   "h": 16
+  },
+  "intent_special": {
+   "x": 20,
+   "y": 38,
+   "w": 16,
+   "h": 16
+  },
+  "intent_stoke": {
+   "x": 38,
+   "y": 38,
+   "w": 16,
+   "h": 16
+  },
+  "intent_summon": {
+   "x": 56,
+   "y": 38,
+   "w": 16,
+   "h": 16
+  },
+  "intent_unknown": {
+   "x": 74,
+   "y": 38,
+   "w": 16,
+   "h": 16
+  },
+  "map_boss": {
+   "x": 92,
+   "y": 38,
+   "w": 16,
+   "h": 16
+  },
+  "map_elite": {
+   "x": 110,
+   "y": 38,
+   "w": 16,
+   "h": 16
+  },
+  "map_event": {
+   "x": 128,
+   "y": 38,
+   "w": 16,
+   "h": 16
+  },
+  "map_fight": {
+   "x": 146,
+   "y": 38,
+   "w": 16,
+   "h": 16
+  },
+  "map_forge": {
+   "x": 2,
+   "y": 56,
+   "w": 16,
+   "h": 16
+  },
+  "map_locked": {
+   "x": 20,
+   "y": 56,
+   "w": 16,
+   "h": 16
+  },
+  "map_rest": {
+   "x": 38,
+   "y": 56,
+   "w": 16,
+   "h": 16
+  },
+  "map_shop": {
+   "x": 56,
+   "y": 56,
+   "w": 16,
+   "h": 16
+  },
+  "map_start": {
+   "x": 74,
+   "y": 56,
+   "w": 16,
+   "h": 16
+  },
+  "map_treasure": {
+   "x": 92,
+   "y": 56,
+   "w": 16,
+   "h": 16
+  },
+  "resource_card": {
+   "x": 110,
+   "y": 56,
+   "w": 16,
+   "h": 16
+  },
+  "resource_deck": {
+   "x": 128,
+   "y": 56,
+   "w": 16,
+   "h": 16
+  },
+  "resource_discard_pile": {
+   "x": 146,
+   "y": 56,
+   "w": 16,
+   "h": 16
+  },
+  "resource_draw_pile": {
+   "x": 2,
+   "y": 74,
+   "w": 16,
+   "h": 16
+  },
+  "resource_ember": {
+   "x": 20,
+   "y": 74,
+   "w": 16,
+   "h": 16
+  },
+  "resource_energy": {
+   "x": 38,
+   "y": 74,
+   "w": 16,
+   "h": 16
+  },
+  "resource_exhaust_pile": {
+   "x": 56,
+   "y": 74,
+   "w": 16,
+   "h": 16
+  },
+  "resource_gem": {
+   "x": 74,
+   "y": 74,
+   "w": 16,
+   "h": 16
+  },
+  "resource_gold": {
+   "x": 92,
+   "y": 74,
+   "w": 16,
+   "h": 16
+  },
+  "resource_hand": {
+   "x": 110,
+   "y": 74,
+   "w": 16,
+   "h": 16
+  },
+  "resource_key": {
+   "x": 128,
+   "y": 74,
+   "w": 16,
+   "h": 16
+  },
+  "resource_potion": {
+   "x": 146,
+   "y": 74,
+   "w": 16,
+   "h": 16
+  },
+  "resource_relic": {
+   "x": 2,
+   "y": 92,
+   "w": 16,
+   "h": 16
+  },
+  "status_barrier": {
+   "x": 20,
+   "y": 92,
+   "w": 16,
+   "h": 16
+  },
+  "status_bleed": {
+   "x": 38,
+   "y": 92,
+   "w": 16,
+   "h": 16
+  },
+  "status_blind": {
+   "x": 56,
+   "y": 92,
+   "w": 16,
+   "h": 16
+  },
+  "status_block": {
+   "x": 74,
+   "y": 92,
+   "w": 16,
+   "h": 16
+  },
+  "status_burn": {
+   "x": 92,
+   "y": 92,
+   "w": 16,
+   "h": 16
+  },
+  "status_cold": {
+   "x": 110,
+   "y": 92,
+   "w": 16,
+   "h": 16
+  },
+  "status_curse": {
+   "x": 128,
+   "y": 92,
+   "w": 16,
+   "h": 16
+  },
+  "status_dodge": {
+   "x": 146,
+   "y": 92,
+   "w": 16,
+   "h": 16
+  },
+  "status_focus": {
+   "x": 2,
+   "y": 110,
+   "w": 16,
+   "h": 16
+  },
+  "status_frail": {
+   "x": 20,
+   "y": 110,
+   "w": 16,
+   "h": 16
+  },
+  "status_frost": {
+   "x": 38,
+   "y": 110,
+   "w": 16,
+   "h": 16
+  },
+  "status_haste": {
+   "x": 56,
+   "y": 110,
+   "w": 16,
+   "h": 16
+  },
+  "status_heat": {
+   "x": 74,
+   "y": 110,
+   "w": 16,
+   "h": 16
+  },
+  "status_mark": {
+   "x": 92,
+   "y": 110,
+   "w": 16,
+   "h": 16
+  },
+  "status_poison": {
+   "x": 110,
+   "y": 110,
+   "w": 16,
+   "h": 16
+  },
+  "status_regen": {
+   "x": 128,
+   "y": 110,
+   "w": 16,
+   "h": 16
+  },
+  "status_shock": {
+   "x": 146,
+   "y": 110,
+   "w": 16,
+   "h": 16
+  },
+  "status_slow": {
+   "x": 2,
+   "y": 128,
+   "w": 16,
+   "h": 16
+  },
+  "status_strength": {
+   "x": 20,
+   "y": 128,
+   "w": 16,
+   "h": 16
+  },
+  "status_stun": {
+   "x": 38,
+   "y": 128,
+   "w": 16,
+   "h": 16
+  },
+  "status_thorns": {
+   "x": 56,
+   "y": 128,
+   "w": 16,
+   "h": 16
+  },
+  "status_vulnerable": {
+   "x": 74,
+   "y": 128,
+   "w": 16,
+   "h": 16
+  },
+  "status_weak": {
+   "x": 92,
+   "y": 128,
+   "w": 16,
+   "h": 16
+  }
+ }
+}
