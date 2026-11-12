@@ -10,26 +10,74 @@ import random
 
 from .png import Canvas, hex_to_rgba
 
-SIZE = 48
-C = SIZE / 2
+SIZE = 64          # exported frame size
+K = SIZE / 48      # effects are written on a 48-unit stage and scaled up
+C = 24.0
 H = hex_to_rgba
 
-PALETTES = {  # rim, body, light, core
-    "fire": ("#a3283a", "#f0642e", "#ffc23d", "#fff6d0"),
-    "ice": ("#264f9e", "#3fa0e8", "#8fe3f5", "#f2feff"),
-    "poison": ("#1f5a2c", "#4fbf5f", "#b6f06a", "#f6ffd6"),
-    "arcane": ("#4a2a80", "#9b59d0", "#e59bf5", "#fff0ff"),
-    "holy": ("#b5761f", "#f2c23d", "#ffeb99", "#ffffff"),
-    "shadow": ("#17131d", "#3d3550", "#7a6f96", "#d9d2ec"),
+# rim, body, mid, light, core, then three smoke tones (dark to light)
+PALETTES = {
+    "fire": ("#7a1420", "#d2321e", "#f57a1c", "#ffc23d", "#fff6d0", "#2a2228", "#4a3d42", "#70626a"),
+    "ice": ("#1d3a8a", "#2f7fe0", "#58c0f0", "#a8eefa", "#f4feff", "#223048", "#3d5574", "#6f8eab"),
+    "poison": ("#14482a", "#2f9a48", "#7ad64a", "#d0f56a", "#f8ffd8", "#1e3324", "#35553a", "#5d8060"),
+    "arcane": ("#3a1d70", "#7c3fc4", "#b765e8", "#f0a6f7", "#fff2ff", "#2a2140", "#463866", "#74619a"),
+    "holy": ("#9a5a12", "#e8a421", "#ffd34d", "#fff0a6", "#ffffff", "#4a3c22", "#7a6840", "#b3a273"),
+    "shadow": ("#0f0c16", "#2b2440", "#51466e", "#8a7fb0", "#e2dcf5", "#15121c", "#26212f", "#3b3447"),
 }
-LEVELS = (0.22, 0.48, 0.8, 1.15)
-BAYER = ((0, 8, 2, 10), (12, 4, 14, 6), (3, 11, 1, 9), (15, 7, 13, 5))
+LEVELS = (0.22, 0.42, 0.68, 0.95, 1.3)
+SMOKE_LEVELS = (0.3, 0.55, 0.85)
+
+_NP = 16
+_rng = random.Random(1234)
+_LAT = [[[_rng.random() for _ in range(_NP)] for _ in range(_NP)] for _ in range(3)]
+
+
+def noise(x: float, y: float, ch: int = 0) -> float:
+    """Smooth value noise in 0..1 that repeats every 16 units (so scrolling it by 16 loops cleanly)."""
+    lat = _LAT[ch]
+    xi, yi = math.floor(x), math.floor(y)
+    fx, fy = x - xi, y - yi
+    fx, fy = fx * fx * (3 - 2 * fx), fy * fy * (3 - 2 * fy)
+    x0, y0, x1, y1 = xi % _NP, yi % _NP, (xi + 1) % _NP, (yi + 1) % _NP
+    a = lat[y0][x0] + (lat[y0][x1] - lat[y0][x0]) * fx
+    b = lat[y1][x0] + (lat[y1][x1] - lat[y1][x0]) * fx
+    return a + (b - a) * fy
 
 
 class Field:
     def __init__(self, size: int = SIZE):
         self.n = size
-        self.v = [[0.0] * size for _ in range(size)]
+        self.v = [[0.0] * size for _ in range(size)]      # energy (fire, light, magic)
+        self.s = [[0.0] * size for _ in range(size)]      # smoke, drawn underneath
+        self._smoke = False
+
+    def smoke(self, cx, cy, r, amp=1.0, soft=0.5, sx=1.0, sy=1.0):
+        self._smoke = True
+        try:
+            self.disc(cx, cy, r, amp, soft, sx, sy)
+        finally:
+            self._smoke = False
+
+    def turbulence(self, strength: float, t: float, scroll: float = 16.0, grain: float = 0.11, bite: float = 0.56):
+        """Warp and erode both channels with scrolling noise: turns round blobs into licks of flame and billows of smoke."""
+        n = self.n
+        amt = strength * K
+        for src_name in ("v", "s"):
+            src = getattr(self, src_name)
+            if not any(any(r) for r in src):
+                continue
+            out = [[0.0] * n for _ in range(n)]
+            for y in range(n):
+                ny = y * grain / K + t * scroll
+                for x in range(n):
+                    nx = x * grain / K
+                    sx = int(x + (noise(nx, ny, 0) - 0.5) * 2 * amt)
+                    sy = int(y + (noise(nx + 5.2, ny + 1.3, 1) - 0.5) * 2 * amt)
+                    if 0 <= sx < n and 0 <= sy < n:
+                        v = src[sy][sx]
+                        if v:
+                            out[y][x] = v * (1 - bite / 2 + bite * noise(nx * 1.9, ny * 1.9, 2))
+            setattr(self, src_name, out)
 
     def _box(self, cx, cy, r):
         n = self.n
@@ -39,11 +87,13 @@ class Field:
         """Filled blob. sx/sy squash it into an ellipse."""
         if r <= 0.2 or amp <= 0:
             return
+        cx, cy, r = cx * K, cy * K, r * K
         x0, x1, y0, y1 = self._box(cx, cy, r * max(sx, sy) * (1 + soft))
         inner = 1 - soft
+        grid = self.s if self._smoke else self.v
         for y in range(y0, y1):
             dy = (y + 0.5 - cy) / sy
-            row = self.v[y]
+            row = grid[y]
             for x in range(x0, x1):
                 dx = (x + 0.5 - cx) / sx
                 d = math.sqrt(dx * dx + dy * dy) / r
@@ -56,6 +106,7 @@ class Field:
         """Ring or arc (angles in degrees, 0 = right, clockwise on screen)."""
         if r <= 0 or amp <= 0 or width <= 0:
             return
+        cx, cy, r, width = cx * K, cy * K, r * K, width * K
         x0, x1, y0, y1 = self._box(cx, cy, (r + width) * max(sx, sy))
         for y in range(y0, y1):
             dy = (y + 0.5 - cy) / sy
@@ -75,6 +126,7 @@ class Field:
     def line(self, xa, ya, xb, yb, width, amp=1.0):
         if width <= 0.05 or amp <= 0:
             return
+        xa, ya, xb, yb, width = xa * K, ya * K, xb * K, yb * K, width * K
         r = width
         x0, x1 = max(0, int(min(xa, xb) - r - 1)), min(self.n, int(max(xa, xb) + r + 2))
         y0, y1 = max(0, int(min(ya, yb) - r - 1)), min(self.n, int(max(ya, yb) + r + 2))
@@ -91,6 +143,7 @@ class Field:
 
     def cut(self, cx, cy, r, sx=1.0, sy=1.0):
         """Remove a disc (used to carve crescents)."""
+        cx, cy, r = cx * K, cy * K, r * K
         x0, x1, y0, y1 = self._box(cx, cy, r * max(sx, sy))
         for y in range(y0, y1):
             dy = (y + 0.5 - cy) / sy
@@ -105,11 +158,14 @@ class Field:
         for y in range(self.n):
             for x in range(self.n):
                 v = self.v[y][x]
-                if dither:
-                    v += (BAYER[y % 4][x % 4] / 16 - 0.5) * 0.22
-                if v < LEVELS[0]:
+                if v >= LEVELS[0]:
+                    c.px[y][x] = cols[4] if v >= LEVELS[4] else cols[3] if v >= LEVELS[3] else cols[2] if v >= LEVELS[2] else cols[1] if v >= LEVELS[1] else cols[0]
                     continue
-                c.px[y][x] = cols[3] if v >= LEVELS[3] else cols[2] if v >= LEVELS[2] else cols[1] if v >= LEVELS[1] else cols[0]
+                sm = self.s[y][x]
+                if sm >= SMOKE_LEVELS[0]:
+                    up = self.s[y - 2][x - 1] if y >= 2 and x >= 1 else 0.0
+                    sm = sm * 0.75 + (0.42 if up < SMOKE_LEVELS[0] else 0.0) + (sm - up) * 0.5      # rim light on the upper-left edge
+                    c.px[y][x] = cols[7] if sm >= SMOKE_LEVELS[2] else cols[6] if sm >= SMOKE_LEVELS[1] else cols[5]
         return c
 
 
@@ -124,23 +180,45 @@ def _parts(seed: str, n: int):
 
 
 # ---------- effects: fn(field, t) with t in [0, 1) ----------
+def _sparks(f, t, seed, n, cx, cy, reach, grav=14.0, size=1.1):
+    for a, s, ph, _ in _parts(seed, n):
+        d = (0.3 + 0.7 * s) * reach * (1 - (1 - t) ** 1.6)
+        x, y = cx + math.cos(a) * d, cy + math.sin(a) * d + grav * t * t
+        f.disc(x, y, size * (0.6 + 0.6 * ph), 1.7 * fade(t, 0.45 + ph * 0.5), 0.6)
+
+
 def explosion(f, t):
-    f.disc(C, C, 4 + 15 * ease(t), 1.7 * fade(t, 1.3), 0.5)
-    f.ring(C, C, 5 + 17 * ease(t), 2.6, 1.1 * fade(t, 0.7))
-    for a, s, _, _ in _parts("explosion", 11):
-        d = 6 + 17 * s * ease(t)
-        f.disc(C + math.cos(a) * d, C + math.sin(a) * d, 3.2 * fade(t) + 0.6, 1.1 * fade(t, 0.6), 0.5)
+    if t < 0.09:                                                   # white flash
+        f.disc(C, C, 8 + 8 * (t / 0.09), 2.4, 0.3)
+    f.disc(C, C, 6 + 13 * ease(t), 1.35 * fade(t, 1.5), 0.6)
+    for a, s, ph, _ in _parts("explosion", 8):                     # fire lobes
+        d = 4 + 13 * s * ease(t)
+        f.disc(C + math.cos(a) * d, C + math.sin(a) * d - 3 * t, 5.0 * fade(t, 0.8) + 1, 0.95 * fade(t, 1.1), 0.6)
+    f.ring(C, C, 6 + 17 * ease(t), 1.5, 1.0 * fade(t, 1.6))
+    grow = min(1.0, max(0.0, (t - 0.12) * 4))
+    gone = fade(max(0.0, (t - 0.72) / 0.28), 1.2)
+    for a, s, ph, dr in _parts("explosion-smoke", 9):              # smoke that outlives the fire
+        d = 5 + 12 * s * ease(t)
+        f.smoke(C + math.cos(a) * d + dr * 2 * t, C + math.sin(a) * d * 0.8 - 9 * t, (4.5 + 3.5 * ph) * (0.6 + 0.6 * ease(t)) * gone + 0.3, 0.62 * grow * gone)
+    _sparks(f, t, "explosion-sparks", 12, C, C, 26)
+    f.turbulence(2.6, t, scroll=3.0)
 
 
 def explosion_small(f, t):
-    f.disc(C, C, 3 + 8 * ease(t), 1.6 * fade(t, 1.2), 0.5)
-    for a, s, _, _ in _parts("pop", 7):
-        d = 4 + 11 * s * ease(t)
-        f.disc(C + math.cos(a) * d, C + math.sin(a) * d, 2.2 * fade(t) + 0.4, 1.0 * fade(t, 0.6))
+    if t < 0.16:
+        f.disc(C, C, 6 + 5 * (t / 0.16), 2.3, 0.3)
+    f.disc(C, C, 4 + 8 * ease(t), 1.8 * fade(t, 1.6), 0.5)
+    for a, s, ph, dr in _parts("pop", 6):
+        d = 3 + 9 * s * ease(t)
+        f.disc(C + math.cos(a) * d, C + math.sin(a) * d, 3.4 * fade(t, 0.8) + 0.6, 1.3 * fade(t, 1.1))
+        f.smoke(C + math.cos(a) * d * 1.1, C + math.sin(a) * d - 6 * t, (3 + 2 * ph) * fade(max(0.0, (t - 0.6) / 0.4)) * min(1.0, t * 4), 1.0)
+    _sparks(f, t, "pop-sparks", 7, C, C, 17)
+    f.turbulence(1.8, t, scroll=3.0)
 
 
 def hit_spark(f, t):
-    f.disc(C, C, 5 * fade(t, 0.6), 1.6 * fade(t), 0.5)
+    f.disc(C, C, 5 * fade(t, 0.6), 2.0 * fade(t), 0.5)
+    _sparks(f, t, "hit-sparks", 6, C, C, 20, grav=8.0, size=0.9)
     for k in range(6):
         a = k * TAU / 6 + 0.3
         r0, r1 = 3 + 12 * ease(t), 8 + 14 * ease(t)
@@ -192,8 +270,11 @@ def pierce(f, t):
 
 
 def magic_burst(f, t):
+    if t < 0.15:
+        f.disc(C, C, 6 + 6 * t / 0.15, 2.2, 0.3)
     f.ring(C, C, 3 + 17 * ease(t), 2.4, 1.4 * fade(t, 0.8))
     f.ring(C, C, 1 + 10 * ease(t), 1.6, 1.0 * fade(t, 1.2))
+    _sparks(f, t, "burst-sparks", 10, C, C, 22, grav=0.0, size=0.9)
     f.disc(C, C, 6 * fade(t, 2), 1.6 * fade(t, 2))
     for k in range(8):
         a = k * TAU / 8 + t * 1.5
@@ -218,35 +299,50 @@ def nova(f, t):
 
 
 def smoke_puff(f, t):
-    for a, s, ph, dr in _parts("smoke", 8):
-        x = C + math.cos(a) * (3 + 15 * s * ease(t)) + dr * 5 * t
-        y = C + 8 + math.sin(a) * 7 * s - 16 * t * (0.4 + ph * 0.7)
-        f.disc(x, y, (3.2 + 3 * ph) * (0.8 + 0.5 * ease(t)) * fade(t, 0.5) + 0.5, 0.75 * fade(t, 0.8), 0.45)
+    gone = fade(max(0.0, (t - 0.62) / 0.38), 0.6)
+    for a, s, ph, dr in _parts("smoke", 9):
+        x = C + math.cos(a) * (2 + 13 * s * ease(t)) + dr * 4 * t
+        y = C + 9 + math.sin(a) * 5 * s - 17 * t * (0.4 + ph * 0.7)
+        f.smoke(x, y, (4.5 + 3.5 * ph) * (0.55 + 0.7 * ease(t)) * gone + 0.3, 0.6 * gone)
+    f.turbulence(2.4, t, scroll=4.0)
 
 
 def dust_land(f, t):
+    gone = fade(max(0.0, (t - 0.6) / 0.4), 0.5)
     for side in (-1, 1):
-        for k in range(4):
-            x = C + side * (3 + (5 + k * 4.5) * ease(t))
-            y = C + 15 - (3 + k * 2.2) * math.sin(t * math.pi) - k * 0.8
-            f.disc(x, y, (6 - k * 0.9) * fade(t, 0.6) + 0.5, 0.7 * fade(t, 0.6), 0.5)
+        for k in range(5):
+            x = C + side * (2 + (5 + k * 4.2) * ease(t))
+            y = C + 16 - (2.5 + k * 2.0) * math.sin(t * math.pi) - k * 0.7
+            f.smoke(x, y, (5.6 - k * 0.7) * gone + 0.3, 0.62 * gone)
+    f.turbulence(1.6, t, scroll=3.0)
 
 
 def flame_loop(f, t):
-    for k in range(7):
-        ph = (t + k / 7) % 1
-        sway = math.sin((t * TAU) + k * 1.7) * (1.5 + 2.5 * ph)
-        f.disc(C + sway, C + 15 - 27 * ph, 7.5 * (1 - ph) ** 0.8 + 0.6, 1.25 * (1 - ph * 0.55), 0.55)
-    f.disc(C, C + 14, 7, 1.0, 0.5, sy=0.7)
+    for k in range(8):
+        ph = (t + k / 8) % 1
+        sway = math.sin((t * TAU) + k * 1.7) * (1.2 + 2.2 * ph)
+        f.disc(C + sway, C + 15 - 25 * ph, 7.8 * (1 - ph) ** 0.75 + 0.5, 0.78 * (1 - ph * 0.6), 0.6)
+    f.disc(C, C + 14, 7, 0.55, 0.6, sy=0.7)
+    f.disc(C, C + 11, 3.5, 0.5, 0.6)
+    for a, s, ph, dr in _parts("embers", 6):                       # embers rising out of the flame
+        tt = (t + ph) % 1
+        f.disc(C + dr * 9 + math.sin(tt * 6 + a) * 2, C + 6 - 26 * tt, 0.9, 1.6 * math.sin(tt * math.pi), 0.6)
+    f.turbulence(2.6, t, scroll=16.0, bite=0.7)
 
 
 def fire_pillar(f, t):
-    grow = ease(min(1, t * 2.5)) * fade(max(0, (t - 0.7) / 0.3), 1)
-    for k in range(9):
-        ph = (t * 2.2 + k / 9) % 1
-        sway = math.sin(t * TAU * 2 + k * 2.1) * 2.2
-        f.disc(C + sway, C + 20 - 40 * ph * grow, (6.5 - 3.5 * ph) * grow + 0.4, 1.3 * grow * (1 - ph * 0.4), 0.5)
-    f.ring(C, C + 19, 6 + 9 * ease(t), 1.8, 1.0 * fade(t, 0.6), sy=0.35)
+    grow = ease(min(1, t * 2.5)) * fade(max(0, (t - 0.72) / 0.28), 1)
+    for k in range(10):
+        ph = (t * 2.2 + k / 10) % 1
+        sway = math.sin(t * TAU * 2 + k * 2.1) * 2.0
+        f.disc(C + sway, C + 20 - 40 * ph * grow, (6.8 - 3.6 * ph) * grow + 0.3, 0.9 * grow * (1 - ph * 0.45), 0.6)
+    f.ring(C, C + 19, 6 + 10 * ease(t), 1.8, 1.1 * fade(t, 0.6), sy=0.35)
+    f.disc(C, C + 19, 8 * grow, 1.3 * grow, sy=0.4)
+    for a, s, ph, dr in _parts("pillar-smoke", 5):
+        tt = max(0.0, t - 0.45) / 0.55
+        f.smoke(C + dr * 6, C - 6 - 12 * tt * (0.5 + ph), (4 + 2 * ph) * math.sin(tt * math.pi), 1.0)
+    _sparks(f, t, "pillar-sparks", 8, C, C + 14, 20, grav=-10.0)
+    f.turbulence(2.4, t, scroll=22.0, bite=0.65)
 
 
 def sparkle_loop(f, t):
@@ -317,6 +413,7 @@ def lightning(f, t):
         f.line(x, y, nx, ny, 1.5 + 0.8 * b, 1.6 * b)
         x, y = nx, ny
     if reach >= 1:
+        _sparks(f, (t - 0.2) / 0.8, "bolt-sparks", 7, x, 43, 14, grav=-4.0)
         f.disc(x, 43, 6 * b, 1.5 * b, sy=0.6)
         f.ring(x, 43, 4 + 10 * t, 1.5, 0.9 * b, sy=0.35)
 
@@ -326,7 +423,9 @@ def orb_loop(f, t):
     f.disc(C + 4, C, 6.5 * pulse, 1.5, 0.5)
     for k in range(5):
         ph = (t + k / 5) % 1
-        f.disc(C + 2 - 20 * ph, C + math.sin(ph * 9 + k) * 2.5, 4.2 * (1 - ph) + 0.4, 0.95 * (1 - ph), 0.6)
+        f.disc(C + 2 - 20 * ph, C + math.sin(ph * 9 + k) * 2.5, 4.4 * (1 - ph) + 0.4, 1.05 * (1 - ph), 0.6)
+    f.disc(C + 5, C - 1, 3, 1.0)
+    f.turbulence(1.5, t, scroll=16.0, bite=0.5)
 
 
 def orb_impact(f, t):
@@ -336,6 +435,9 @@ def orb_impact(f, t):
         a = math.pi + (k - 2) * 0.45
         d = 5 + 15 * ease(t)
         f.disc(C + math.cos(a) * d, C + math.sin(a) * d, 2.3 * fade(t), 1.1 * fade(t, 0.6))
+    if t < 0.15:
+        f.disc(C, C, 7 + 4 * t / 0.15, 2.3, 0.3)
+    _sparks(f, t, "impact-sparks", 8, C, C, 20, grav=6.0)
 
 
 def beam(f, t):
@@ -449,6 +551,9 @@ def muzzle(f, t):
     f.line(8, C, 8 + polyL, C, 3.4 * b + 0.3, 1.5 * b)
     for sgn in (-1, 1):
         f.line(8, C, 8 + polyL * 0.55, C + sgn * polyL * 0.42, 2.0 * b + 0.2, 1.2 * b)
+    for k in range(3):
+        f.smoke(12 + k * 5 + 8 * t, C - 2 - 7 * t - k, (3.5 - k * 0.6) * math.sin(min(1.0, t * 1.1) * math.pi), 1.0)
+    f.turbulence(1.2, t, scroll=3.0)
 
 
 def aura_loop(f, t):
@@ -464,14 +569,19 @@ def meteor(f, t):
     x, y = 6 + 22 * p, 2 + 34 * p
     if t < 0.55:
         f.disc(x, y, 4.5, 1.6)
-        for k in range(1, 6):
-            f.disc(x - k * 3.2, y - k * 5, 3.6 - k * 0.5, 1.1 - k * 0.15, 0.6)
+        for k in range(1, 7):
+            f.disc(x - k * 3.0, y - k * 4.7, 3.8 - k * 0.5, 1.3 - k * 0.16, 0.6)
+            f.smoke(x - k * 3.4 - 2, y - k * 5.3 - 2, 3.2 - k * 0.3, 0.9)
     else:
         tt = (t - 0.55) / 0.45
         f.disc(28, 38, 4 + 11 * ease(tt), 1.7 * fade(tt, 1.2), sy=0.75)
         f.ring(28, 40, 4 + 16 * ease(tt), 2.2, 1.2 * fade(tt, 0.8), sy=0.36)
-        for a, s, _, dr in _parts("meteor", 7):
-            f.disc(28 + dr * 17 * ease(tt), 38 - (9 + 12 * s) * math.sin(tt * math.pi), 2.2 * fade(tt), fade(tt, 0.6))
+        if tt < 0.2:
+            f.disc(28, 37, 9 + 5 * tt / 0.2, 2.3, 0.3, sy=0.8)
+        for a, s, ph, dr in _parts("meteor", 8):
+            f.disc(28 + dr * 17 * ease(tt), 38 - (9 + 12 * s) * math.sin(tt * math.pi), 2.2 * fade(tt), 1.4 * fade(tt, 0.6))
+            f.smoke(28 + dr * 13 * ease(tt), 36 - 12 * tt * (0.5 + ph), (4 + 3 * ph) * math.sin(min(1.0, tt * 1.15) * math.pi) ** 0.6, 1.0)
+    f.turbulence(2.0, t, scroll=4.0)
 
 
 def rune_circle(f, t):
@@ -527,6 +637,9 @@ EFFECTS: dict[str, tuple] = {
     "meteor": (meteor, 12, False, 14, False, "meteor"),
     "rune_circle": (rune_circle, 12, False, 12, False, "rune"),
 }
+
+
+EFFECTS = {k: (fn, round(n * 1.5), loops, round(fps * 1.5), dither, sound) for k, (fn, n, loops, fps, dither, sound) in EFFECTS.items()}
 
 
 def fields(name: str) -> list[Field]:

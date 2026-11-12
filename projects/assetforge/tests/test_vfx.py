@@ -11,6 +11,7 @@ BUILD_UPS = {"charge"}  # end at full strength on purpose: they lead into anothe
 class Vfx(unittest.TestCase):
     def test_every_effect_animates_and_stays_in_frame(self):
         self.assertGreaterEqual(len(vfx.EFFECTS), 37)
+        self.assertEqual(vfx.SIZE, 64)
         seen = set()
         for name, (fn, n, loops, fps, dither, sound) in vfx.EFFECTS.items():
             frs = vfx.frames(name, "fire")
@@ -22,7 +23,7 @@ class Vfx(unittest.TestCase):
             self.assertGreaterEqual(len(distinct), n - 1, f"{name} repeats frames")
             for f in frs:
                 edge = sum(1 for i in range(vfx.SIZE) if f.px[0][i][3] or f.px[-1][i][3] or f.px[i][0][3] or f.px[i][-1][3])
-                self.assertLess(edge, 30, f"{name} is cut off by the frame edge")
+                self.assertLess(edge, 40, f"{name} is cut off by the frame edge")
             if not loops and name not in BUILD_UPS:
                 self.assertLess(counts[-1], max(counts) * 0.6, f"{name} should fade out at the end")
             key = tuple(tuple(map(tuple, f.px)) for f in frs)
