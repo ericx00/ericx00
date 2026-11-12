@@ -31,6 +31,8 @@ def main(argv: list[str] | None = None) -> int:
     d = sub.add_parser("deck", help="Deckbuilder Kit + free starter")
     d.add_argument("--out", default="dist")
     d.add_argument("--variants", type=int, default=4)
+    x = sub.add_parser("extras", help="Pixel VFX (paid + free), Card & Forge SFX, free Pixel Fonts")
+    x.add_argument("--out", default="dist")
     c = sub.add_parser("creature")
     c.add_argument("seed", type=int)
     c.add_argument("palette", choices=sorted(PALETTES))
@@ -52,6 +54,12 @@ def main(argv: list[str] | None = None) -> int:
         from .deckpack import build as build_deck
         t = time.time()
         for p in build_deck(Path(a.out), a.variants):
+            print(f"{p.name}: {sum(1 for f in p.rglob('*') if f.is_file())} files")
+        print(f"done in {time.time() - t:.1f}s -> {a.out}")
+    elif a.cmd == "extras":
+        from .vfxpack import build as build_extras
+        t = time.time()
+        for p in build_extras(Path(a.out)):
             print(f"{p.name}: {sum(1 for f in p.rglob('*') if f.is_file())} files")
         print(f"done in {time.time() - t:.1f}s -> {a.out}")
     elif a.cmd == "sfx":
